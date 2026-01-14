@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,17 +10,53 @@ namespace POSv01.Infrastructure
         public static string GetDbPath()
         {
             var cfg = AppConfig.Current.GetSection("Database");
-            var mode = (cfg["Mode"] ?? "LocalAppData").Trim();
+            var mode = (cfg["Database:Mode"] ?? "LocalAppData").Trim();
+            var custom = (cfg["Database:CustomPath"] ?? "pos.db").Trim();
 
             return mode switch
             {
                 "Bin" => Path.Combine(AppContext.BaseDirectory, "pos.db"),
 
-                "Custom" => ResolveCustomPath(cfg["CustomPath"]),
+                //"Custom" => ResolveCustomPath(cfg["CustomPath"]),
+                "Custom" => Path.IsPathRooted(custom)
+                ? custom
+                    : Path.Combine(AppContext.BaseDirectory, custom),
 
-                _ => ResolveLocalAppDataPath()
+                _ => BuildLocalAppDataPath("POSv01", "pos.db"),
+                //_ => ResolveLocalAppDataPath()
             };
         }
+
+
+        public static string GetConnectionString()
+        {
+            var dbPath = GetDbPath();
+            Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+            return $"Data Source={dbPath}";
+        }
+
+        public static bool AllowNegativeStock()
+        {
+            return AppConfig.Current.GetValue("Database:AllowNegativeStock", true);
+        }
+
+        public static string GetImagesDirectory()
+        {
+            var dir = Path.Combine(AppContext.BaseDirectory, "images");
+            Directory.CreateDirectory(dir);
+            return dir;
+        }
+
+        private static string BuildLocalAppDataPath(string appName, string fileName)
+        {
+            var root = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var dir = Path.Combine(root, appName);
+            Directory.CreateDirectory(dir);
+            return Path.Combine(dir, fileName);
+        }
+
+
+
 
         public static string GetImagesDir()
         {
