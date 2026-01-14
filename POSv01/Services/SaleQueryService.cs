@@ -35,8 +35,8 @@ namespace POSv01.Services
             {
                 keyword = keyword.Trim();
                 q = q.Where(r =>
-                    r.ReturnNo.Contains(keyword) ||
-                    r.Sale.SaleNo.Contains(keyword));
+                r.ReturnNo.Contains(keyword) ||
+                (r.Sale != null && r.Sale.SaleNo.Contains(keyword)));
             }
 
             return q.OrderByDescending(r => r.CreatedAt).ToList();

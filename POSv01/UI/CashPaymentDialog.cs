@@ -1,24 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 using System.Windows.Forms;
 
 namespace POSv01.UI
-
 {
-    /// <summary>
-    /// 現金收款輸入視窗（輸入實收）。
-    /// </summary>
     public sealed class CashPaymentDialog : Form
     {
         private readonly decimal _total;
-
-        private readonly TextBox _txtPaid = new();
-        private readonly Label _lblTotal = new();
-        private readonly Label _lblHint = new();
-        private readonly Button _btnOk = new();
-        private readonly Button _btnCancel = new();
+        private readonly TextBox _txtPaid = new() { Left = 120, Top = 16, Width = 180 };
+        private readonly Label _lblTotal = new() { Left = 20, Top = 18, Width = 280 };
 
         public decimal PaidAmount { get; private set; }
 
@@ -27,67 +16,53 @@ namespace POSv01.UI
             _total = total;
 
             Text = "現金收款";
-            Width = 360;
-            Height = 200;
+            Width = 340;
+            Height = 150;
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
 
-            _lblTotal.Left = 16;
-            _lblTotal.Top = 16;
-            _lblTotal.Width = 300;
             _lblTotal.Text = $"應收：{_total:0.##}";
-
-            _lblHint.Left = 16;
-            _lblHint.Top = 46;
-            _lblHint.Width = 300;
-            _lblHint.Text = "實收金額：";
-
-            _txtPaid.Left = 16;
-            _txtPaid.Top = 70;
-            _txtPaid.Width = 300;
-            _txtPaid.Text = _total.ToString("0.##", CultureInfo.InvariantCulture);
-
-            _btnOk.Left = 150;
-            _btnOk.Top = 110;
-            _btnOk.Width = 80;
-            _btnOk.Text = "確定";
-            _btnOk.Click += (_, _) => TryOk();
-
-            _btnCancel.Left = 236;
-            _btnCancel.Top = 110;
-            _btnCancel.Width = 80;
-            _btnCancel.Text = "取消";
-            _btnCancel.Click += (_, _) => { DialogResult = DialogResult.Cancel; Close(); };
-
             Controls.Add(_lblTotal);
-            Controls.Add(_lblHint);
+
+            Controls.Add(new Label { Left = 20, Top = 50, Width = 90, Text = "收款金額" });
+            _txtPaid.Top = 46;
+            _txtPaid.Text = total.ToString("0.##");
             Controls.Add(_txtPaid);
-            Controls.Add(_btnOk);
-            Controls.Add(_btnCancel);
 
-            AcceptButton = _btnOk;
-            CancelButton = _btnCancel;
-        }
+            var btnOk = new Button { Left = 120, Top = 78, Width = 80, Text = "確定" };
+            var btnCancel = new Button { Left = 220, Top = 78, Width = 80, Text = "取消" };
 
-        private void TryOk()
-        {
-            if (!decimal.TryParse(_txtPaid.Text.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out var paid))
+            btnOk.Click += (_, _) =>
             {
-                MessageBox.Show("實收金額格式錯誤。", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+                if (!decimal.TryParse(_txtPaid.Text.Trim(), out var paid))
+                {
+                    MessageBox.Show("金額格式錯誤");
+                    return;
+                }
+                if (paid < _total)
+                {
+                    MessageBox.Show("現金不足");
+                    return;
+                }
 
-            if (paid < _total)
+                PaidAmount = paid;
+                DialogResult = DialogResult.OK;
+                Close();
+            };
+
+            btnCancel.Click += (_, _) =>
             {
-                MessageBox.Show("實收金額不足。", "不足", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+                DialogResult = DialogResult.Cancel;
+                Close();
+            };
 
-            PaidAmount = paid;
-            DialogResult = DialogResult.OK;
-            Close();
+            Controls.Add(btnOk);
+            Controls.Add(btnCancel);
+
+            AcceptButton = btnOk;
+            CancelButton = btnCancel;
         }
     }
 }

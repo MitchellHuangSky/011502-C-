@@ -105,12 +105,13 @@ namespace POSv01
 
 
         // ✅ 退貨單
-        public ReceiptPreviewForm(ReturnReceiptDto returnReceipt)
+        public ReceiptPreviewForm(POSv01.Services.ReturnReceiptDto returnReceipt)
             : this(
-                title: "退貨單預覽",
-                text: BuildReturnReceiptText(returnReceipt),
-                defaultFileName: $"Return_{SafeName(returnReceipt.ReturnNo)}_{returnReceipt.CreatedAtLocal:yyyyMMdd_HHmmss}.txt")
+        title: "退貨單預覽",
+        text: BuildReturnReceiptText(returnReceipt),
+        defaultFileName: $"Return_{SafeName(returnReceipt.ReturnNo)}_{returnReceipt.CreatedAtLocal:yyyyMMdd_HHmmss}.txt")
         { }
+
 
         // ✅ 通用
         public ReceiptPreviewForm(string title, string text, string defaultFileName, bool autoPreview = false)
@@ -333,7 +334,8 @@ namespace POSv01
         }
 
         // ✅ 你報錯的就是這個：BuildReturnReceiptText 必須存在
-        private static string BuildReturnReceiptText(ReturnReceiptDto r)
+        private static string BuildReturnReceiptText(POSv01.Services.ReturnReceiptDto r)
+
         {
             const int width = 32;
             static string Line(char c) => new string(c, width);
@@ -379,5 +381,24 @@ namespace POSv01
             sb.AppendLine(Center("謝謝光臨"));
             return sb.ToString();
         }
+
+        /*
+        public sealed class ReturnReceiptDto
+        {
+            public int ReturnId { get; set; }
+            public string ReturnNo { get; set; } = "";
+            public DateTime CreatedAtLocal { get; set; }
+
+            // ✅ 給 ReceiptPreviewForm 用
+            public string OriginalSaleNo { get; set; } = "";
+            public string? MemberCode { get; set; }
+            public string? ClerkName { get; set; }
+
+            public decimal TotalRefund { get; set; }
+            public List<ReturnItemRow> Items { get; set; } = new();
+        }
+        */
+
+
     }
 }

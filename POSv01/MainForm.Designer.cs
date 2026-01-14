@@ -39,12 +39,13 @@
             label2 = new Label();
             label3 = new Label();
             btnRemoveSelected = new Button();
+            button1 = new Button();
             ((System.ComponentModel.ISupportInitialize)gridCart).BeginInit();
             SuspendLayout();
             // 
             // txtBarcode
             // 
-            txtBarcode.Location = new Point(82, 12);
+            txtBarcode.Location = new Point(82, 6);
             txtBarcode.Name = "txtBarcode";
             txtBarcode.Size = new Size(160, 23);
             txtBarcode.TabIndex = 0;
@@ -61,6 +62,7 @@
             // 
             // gridCart
             // 
+            gridCart.BackgroundColor = SystemColors.ActiveCaption;
             gridCart.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             gridCart.Location = new Point(23, 41);
             gridCart.Name = "gridCart";
@@ -84,6 +86,7 @@
             btnClear.TabIndex = 4;
             btnClear.Text = "清空";
             btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += btnClear_Click;
             // 
             // btnCash
             // 
@@ -93,6 +96,7 @@
             btnCash.TabIndex = 5;
             btnCash.Text = "現金";
             btnCash.UseVisualStyleBackColor = true;
+            btnCash.Click += btnCash_Click;
             // 
             // btnCard
             // 
@@ -102,6 +106,7 @@
             btnCard.TabIndex = 6;
             btnCard.Text = "信用卡";
             btnCard.UseVisualStyleBackColor = true;
+            btnCard.Click += btnCard_Click;
             // 
             // btnMobile
             // 
@@ -111,6 +116,7 @@
             btnMobile.TabIndex = 7;
             btnMobile.Text = "行動支付";
             btnMobile.UseVisualStyleBackColor = true;
+            btnMobile.Click += btnMobile_Click;
             // 
             // label2
             // 
@@ -138,12 +144,24 @@
             btnRemoveSelected.TabIndex = 10;
             btnRemoveSelected.Text = "移除選取";
             btnRemoveSelected.UseVisualStyleBackColor = true;
+            btnRemoveSelected.Click += btnRemoveSelected_Click;
+            // 
+            // button1
+            // 
+            button1.Location = new Point(275, 12);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 11;
+            button1.Text = "button1";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += btnPickProducts_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(button1);
             Controls.Add(btnRemoveSelected);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -175,5 +193,6 @@
         private Label label2;
         private Label label3;
         private Button btnRemoveSelected;
+        private Button button1;
     }
 }
