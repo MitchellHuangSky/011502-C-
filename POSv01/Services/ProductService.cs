@@ -3,10 +3,10 @@ using POSv01.Domain.Entities;
 using POSv01.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Text;
-
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Xml.Linq;
 
 
 
@@ -44,6 +44,7 @@ namespace POSv01.Services
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("名稱不可空白");
             if (unitPrice < 0) throw new ArgumentException("單價不可小於 0");
             if (_db.Products.Any(p => p.Barcode == barcode)) throw new InvalidOperationException("條碼已存在");
+            if (_db.Products.Any(p => p.Name == name)) throw new InvalidOperationException("品項已存在");
 
             var relImagePath = CopyImageToImagesFolder(sourceImagePath);
 

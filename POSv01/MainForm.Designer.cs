@@ -44,49 +44,44 @@
             // 
             // txtBarcode
             // 
-            txtBarcode.Location = new Point(147, 24);
-            txtBarcode.Margin = new Padding(4);
+            txtBarcode.Location = new Point(114, 19);
             txtBarcode.Name = "txtBarcode";
-            txtBarcode.Size = new Size(481, 27);
+            txtBarcode.Size = new Size(375, 23);
             txtBarcode.TabIndex = 0;
             txtBarcode.KeyDown += txtBarcode_KeyDown;
             // 
             // lblBarcode
             // 
             lblBarcode.AutoSize = true;
-            lblBarcode.Location = new Point(28, 28);
-            lblBarcode.Margin = new Padding(4, 0, 4, 0);
+            lblBarcode.Location = new Point(22, 22);
             lblBarcode.Name = "lblBarcode";
-            lblBarcode.Size = new Size(84, 19);
+            lblBarcode.Size = new Size(67, 15);
             lblBarcode.TabIndex = 1;
             lblBarcode.Text = "條碼輸入：";
             // 
             // gridCart
             // 
             gridCart.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            gridCart.Location = new Point(28, 73);
-            gridCart.Margin = new Padding(4);
+            gridCart.Location = new Point(22, 58);
             gridCart.Name = "gridCart";
             gridCart.RowHeadersWidth = 51;
-            gridCart.Size = new Size(951, 532);
+            gridCart.Size = new Size(740, 420);
             gridCart.TabIndex = 2;
             // 
             // btnClear
             // 
-            btnClear.Location = new Point(28, 623);
-            btnClear.Margin = new Padding(4);
+            btnClear.Location = new Point(22, 492);
             btnClear.Name = "btnClear";
-            btnClear.Size = new Size(129, 38);
+            btnClear.Size = new Size(100, 30);
             btnClear.TabIndex = 3;
             btnClear.Text = "清空";
             btnClear.UseVisualStyleBackColor = true;
             // 
             // btnRemoveSelected
             // 
-            btnRemoveSelected.Location = new Point(170, 623);
-            btnRemoveSelected.Margin = new Padding(4);
+            btnRemoveSelected.Location = new Point(132, 492);
             btnRemoveSelected.Name = "btnRemoveSelected";
-            btnRemoveSelected.Size = new Size(154, 38);
+            btnRemoveSelected.Size = new Size(120, 30);
             btnRemoveSelected.TabIndex = 4;
             btnRemoveSelected.Text = "移除一筆";
             btnRemoveSelected.UseVisualStyleBackColor = true;
@@ -94,49 +89,44 @@
             // lblTotalTitle
             // 
             lblTotalTitle.AutoSize = true;
-            lblTotalTitle.Location = new Point(656, 630);
-            lblTotalTitle.Margin = new Padding(4, 0, 4, 0);
+            lblTotalTitle.Location = new Point(510, 497);
             lblTotalTitle.Name = "lblTotalTitle";
-            lblTotalTitle.Size = new Size(69, 19);
+            lblTotalTitle.Size = new Size(55, 15);
             lblTotalTitle.TabIndex = 5;
             lblTotalTitle.Text = "總金額：";
             // 
             // lblTotal
             // 
             lblTotal.AutoSize = true;
-            lblTotal.Location = new Point(734, 621);
-            lblTotal.Margin = new Padding(4, 0, 4, 0);
+            lblTotal.Location = new Point(571, 490);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(31, 19);
+            lblTotal.Size = new Size(24, 15);
             lblTotal.TabIndex = 6;
             lblTotal.Text = "$ 0";
             // 
             // btnCash
             // 
-            btnCash.Location = new Point(28, 684);
-            btnCash.Margin = new Padding(4);
+            btnCash.Location = new Point(22, 540);
             btnCash.Name = "btnCash";
-            btnCash.Size = new Size(309, 79);
+            btnCash.Size = new Size(240, 62);
             btnCash.TabIndex = 7;
             btnCash.Text = "現金結帳";
             btnCash.UseVisualStyleBackColor = true;
             // 
             // btnCard
             // 
-            btnCard.Location = new Point(28, 773);
-            btnCard.Margin = new Padding(4);
+            btnCard.Location = new Point(22, 610);
             btnCard.Name = "btnCard";
-            btnCard.Size = new Size(309, 79);
+            btnCard.Size = new Size(240, 62);
             btnCard.TabIndex = 8;
             btnCard.Text = "信用卡";
             btnCard.UseVisualStyleBackColor = true;
             // 
             // btnMobile
             // 
-            btnMobile.Location = new Point(28, 861);
-            btnMobile.Margin = new Padding(4);
+            btnMobile.Location = new Point(22, 680);
             btnMobile.Name = "btnMobile";
-            btnMobile.Size = new Size(309, 79);
+            btnMobile.Size = new Size(240, 62);
             btnMobile.TabIndex = 9;
             btnMobile.Text = "行動支付";
             btnMobile.UseVisualStyleBackColor = true;
@@ -144,28 +134,26 @@
             // flpQuick
             // 
             flpQuick.FlowDirection = FlowDirection.TopDown;
-            flpQuick.Location = new Point(1016, 58);
-            flpQuick.Margin = new Padding(4);
+            flpQuick.Location = new Point(790, 46);
             flpQuick.Name = "flpQuick";
-            flpQuick.Size = new Size(334, 882);
+            flpQuick.Size = new Size(260, 696);
             flpQuick.TabIndex = 11;
             flpQuick.WrapContents = false;
             // 
             // lblQuick
             // 
             lblQuick.AutoSize = true;
-            lblQuick.Location = new Point(1016, 28);
-            lblQuick.Margin = new Padding(4, 0, 4, 0);
+            lblQuick.Location = new Point(790, 22);
             lblQuick.Name = "lblQuick";
-            lblQuick.Size = new Size(99, 19);
+            lblQuick.Size = new Size(79, 15);
             lblQuick.TabIndex = 10;
             lblQuick.Text = "快捷功能區：";
             // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(9F, 19F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1389, 975);
+            ClientSize = new Size(1080, 770);
             Controls.Add(flpQuick);
             Controls.Add(lblQuick);
             Controls.Add(btnMobile);
@@ -178,7 +166,6 @@
             Controls.Add(gridCart);
             Controls.Add(lblBarcode);
             Controls.Add(txtBarcode);
-            Margin = new Padding(4);
             Name = "MainForm";
             Text = "POSv01 超商收銀台";
             ((System.ComponentModel.ISupportInitialize)gridCart).EndInit();
