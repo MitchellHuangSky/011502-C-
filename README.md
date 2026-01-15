@@ -11,18 +11,18 @@
 > 你之後要補截圖，只要把下面連結換成你的檔名即可 ✅
 
 ### 主收銀台畫面
-![主收銀台畫面](docs/images/main-pos.png)
 <img width="1171" height="607" alt="圖片2" src="https://github.com/user-attachments/assets/29bf6274-ca79-48ce-aef3-6fd78e1c7429" />
 
 
 ### 商品選擇（快速加入購物車）
-![商品選擇](docs/images/product-picker.png)
+<img width="1155" height="632" alt="圖片1" src="https://github.com/user-attachments/assets/9ee84a08-06aa-4369-be6b-c348c52d3006" />
+
 
 ### 訂單查詢 / 退貨查詢
-![訂單查詢](docs/images/order-lookup.png)
+<img width="925" height="437" alt="圖片5" src="https://github.com/user-attachments/assets/30a66a3b-f770-4a0d-a21f-f344e3ef03fc" />
 
 ### 收據預覽
-![收據預覽](docs/images/receipt-preview.png)
+<img width="539" height="618" alt="圖片6" src="https://github.com/user-attachments/assets/2ed14983-e35c-4c98-8c0b-41abd96fae0a" />
 
 ---
 
