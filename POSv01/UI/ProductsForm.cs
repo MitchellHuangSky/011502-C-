@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 
 
-namespace POSv01
+namespace POSv01.UI
 {
     /// <summary>
     /// 商品照片選取視窗（Designer 已拉 UI）
@@ -20,6 +20,12 @@ namespace POSv01
     /// - 搜尋（條碼/名稱）
     /// - 新增商品（含照片）
     /// - 點商品卡 → 回呼 MainForm 加入購物車
+    /// 
+  
+    /// - 連續點選：點卡片就加 1
+    /// - 批量加入：勾選 + 設定數量 + 加入選取
+    /// - 搜尋（條碼/名稱）
+    /// - 新增商品（含照片）
     /// </summary>
     public partial class ProductsForm : Form
     {
@@ -38,10 +44,24 @@ namespace POSv01
         private const string FlowLayoutName = "flpProducts";
         private const string PanelName = "pnlProducts";
 
+        // ✅ 新增：批量加入按鈕（如果 Designer 沒有，我會動態生成）
+        private const string AddSelectedButtonName = "btnAddSelected";
+
         private TextBox _txtSearch = null!;
         private Button _btnSearch = null!;
         private Button _btnAdd = null!;
+        private Button _btnAddSelected = null!;
         private Control _container = null!;
+
+
+        private sealed class CardState
+        {
+            public Product Product = null!;
+            public CheckBox Chk = null!;
+            public NumericUpDown Qty = null!;
+        }
+        private readonly List<CardState> _cardStates = new();
+
 
         private readonly List<Panel> _cards = new();
 
@@ -58,6 +78,7 @@ namespace POSv01
             _onPick = onPick ?? throw new ArgumentNullException(nameof(onPick));
 
             BindControlsByName();
+            EnsureAddSelectedButton();
             WireEvents();
             ReloadProducts();
         }
@@ -96,6 +117,28 @@ namespace POSv01
             pnl.AutoScroll = true;
             _container = pnl;
         }
+        private void EnsureAddSelectedButton()
+        {
+            // ✅ 如果 Designer 沒有 btnAddSelected，就動態補一顆
+            _btnAddSelected = FindOptional<Button>(AddSelectedButtonName) ?? new Button
+            {
+                Name = AddSelectedButtonName,
+                Text = "加入選取",
+                Width = 90,
+                Height = _btnAdd.Height
+            };
+
+            if (_btnAddSelected.Parent == null)
+            {
+                // 放在「新增商品」按鈕右邊
+                _btnAddSelected.Left = _btnAdd.Right + 8;
+                _btnAddSelected.Top = _btnAdd.Top;
+                Controls.Add(_btnAddSelected);
+                _btnAddSelected.BringToFront();
+            }
+        }
+
+
 
         private void WireEvents()
         {
@@ -120,7 +163,45 @@ namespace POSv01
                     ReloadProducts();
                 }
             };
+            // ✅ 批量加入
+            _btnAddSelected.Click += (_, _) => AddSelectedToCart();
         }
+        private void AddSelectedToCart()
+        {
+            EnsureInjected();
+
+            var selected = _cardStates.Where(x => x.Chk.Checked).ToList();
+            if (selected.Count == 0)
+            {
+                MessageBox.Show("請先勾選要加入的商品。", "加入選取", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            foreach (var s in selected)
+            {
+                var qty = (int)s.Qty.Value;
+                if (qty <= 0) qty = 1;
+
+                for (int i = 0; i < qty; i++)
+                    _onPick!.Invoke(s.Product);
+            }
+
+            // ✅ 清除勾選（避免重複加）
+            foreach (var s in selected)
+            {
+                s.Chk.Checked = false;
+                s.Qty.Value = 1;
+            }
+
+            if (CloseOnPick)
+            {
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+        }
+
+
+
 
         private void ReloadProducts()
         {
@@ -135,7 +216,7 @@ namespace POSv01
             foreach (var p in products)
             {
                 var card = CreateProductCard(p);
-                _cards.Add(card);
+                //_cards.Add(card);
                 _container.Controls.Add(card);
             }
 
@@ -146,18 +227,37 @@ namespace POSv01
         {
             var card = new Panel
             {
-                Width = 170,
-                Height = 220,
+                Width = 180,
+                Height = 240,
                 Margin = new Padding(8),
                 BorderStyle = BorderStyle.FixedSingle,
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                BackColor = Color.White
+            };
+
+            var chk = new CheckBox
+            {
+                Left = 8,
+                Top = 8,
+                Width = 18,
+                Height = 18
+            };
+
+            var qty = new NumericUpDown
+            {
+                Left = 120,
+                Top = 6,
+                Width = 50,
+                Minimum = 1,
+                Maximum = 999,
+                Value = 1
             };
 
             var pic = new PictureBox
             {
                 Left = 8,
-                Top = 8,
-                Width = 170 - 16,
+                Top = 30,
+                Width = 180 - 16,
                 Height = 120,
                 SizeMode = PictureBoxSizeMode.Zoom,
                 BackColor = Color.White
@@ -166,8 +266,8 @@ namespace POSv01
             var name = new Label
             {
                 Left = 8,
-                Top = 136,
-                Width = 170 - 16,
+                Top = 156,
+                Width = 180 - 16,
                 Height = 40,
                 Text = p.Name,
                 AutoEllipsis = true
@@ -176,15 +276,17 @@ namespace POSv01
             var price = new Label
             {
                 Left = 8,
-                Top = 180,
-                Width = 170 - 16,
+                Top = 202,
+                Width = 180 - 16,
                 Height = 24,
-                Text = $"$ {p.UnitPrice:0.##}"
+                Text = $"$ {p.UnitPrice:0.##}",
+                Font = new Font(Font.FontFamily, 10f, FontStyle.Bold)
             };
 
             SetImage(pic, p.ImagePath);
 
-            void Pick()
+            // ✅ 連續點選：點卡片就直接加 1
+            void PickOne()
             {
                 EnsureInjected();
                 _onPick!.Invoke(p);
@@ -196,14 +298,19 @@ namespace POSv01
                 }
             }
 
-            card.Click += (_, _) => Pick();
-            pic.Click += (_, _) => Pick();
-            name.Click += (_, _) => Pick();
-            price.Click += (_, _) => Pick();
+            // ✅ 避免點到 CheckBox / 數量時也觸發 Pick
+            card.Click += (_, _) => PickOne();
+            pic.Click += (_, _) => PickOne();
+            name.Click += (_, _) => PickOne();
+            price.Click += (_, _) => PickOne();
 
+            card.Controls.Add(chk);
+            card.Controls.Add(qty);
             card.Controls.Add(pic);
             card.Controls.Add(name);
             card.Controls.Add(price);
+
+            _cardStates.Add(new CardState { Product = p, Chk = chk, Qty = qty });
 
             return card;
         }
@@ -244,10 +351,14 @@ namespace POSv01
             return c;
         }
 
+        //private T? FindOptional<T>(string name) where T : Control
+        //{
+        //    return Controls.Find(name, true).FirstOrDefault() as T;
+        //}
+
         private T? FindOptional<T>(string name) where T : Control
-        {
-            return Controls.Find(name, true).FirstOrDefault() as T;
-        }
+            => Controls.Find(name, true).FirstOrDefault() as T;
+
 
         // ✅ 內建新增商品（不用 Designer）
         private sealed class AddProductDialogLite : Form

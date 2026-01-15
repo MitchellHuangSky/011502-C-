@@ -1,4 +1,4 @@
-﻿namespace POSv01
+﻿namespace POSv01.UI
 {
     partial class ProductsForm
     {

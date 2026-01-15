@@ -105,7 +105,9 @@ namespace POSv01
 
 
         // ✅ 退貨單
-        public ReceiptPreviewForm(POSv01.Services.ReturnReceiptDto returnReceipt)
+        
+        public ReceiptPreviewForm(ReturnReceiptDto returnReceipt, bool autoPreview = false)
+
             : this(
         title: "退貨單預覽",
         text: BuildReturnReceiptText(returnReceipt),

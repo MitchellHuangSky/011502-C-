@@ -13,32 +13,67 @@ namespace POSv01
 {
     public partial class MainForm : Form
     {
-        private readonly PosDbContext _dbContext;
-        private readonly SaleService _saleService;
-        private readonly ProductService _productService;
-        private readonly InventoryService _inventoryService;
-        private readonly CheckoutService _checkoutService;
+        // ✅ 設計模式時會 return，這些欄位會沒初始化，所以用 null! 安全消除 CS8618
+        private PosDbContext _dbContext = null!;
+        private SaleService _saleService = null!;
+        private ProductService _productService = null!;
+        private InventoryService _inventoryService = null!;
+        private CheckoutService _checkoutService = null!;
+        private SaleQueryService _saleQueryService = null!;
+        private ReturnService _returnService = null!;
+        private ReturnQueryService _returnQueryService = null!;
 
-        private readonly SaleQueryService _saleQueryService;
-        private readonly ReturnService _returnService;
-        private readonly ReturnQueryService _returnQueryService;
+        private readonly BindingList<CartItemViewModel> _cartItems = new();
+
+
+        //private readonly PosDbContext _dbContext;
+        //private readonly SaleService _saleService;
+        //private readonly ProductService _productService;
+        //private readonly InventoryService _inventoryService;
+        //private readonly CheckoutService _checkoutService;
+
+        //private readonly SaleQueryService _saleQueryService;
+        //private readonly ReturnService _returnService;
+        //private readonly ReturnQueryService _returnQueryService;
 
 
 
-        private readonly BindingList<CartItemViewModel> _cartItems =
-            new BindingList<CartItemViewModel>();
+        //private readonly BindingList<CartItemViewModel> _cartItems =
+        //    new BindingList<CartItemViewModel>();
+
 
         private Button _btnPickProducts = null!;
         private Button _btnOrderLookup = null!;
         private Button _btnReturn = null!;
         private Button _btnHelp = null!;
 
+        private Button _btnReturnDrop = null!;
+        private ContextMenuStrip _returnMenu = null!;
+
+        //private ContextMenuStrip _helpMenu = null!;
+        //private ContextMenuStrip _productMenu = null!;
+        //private ContextMenuStrip _inventoryMenu = null!;
+        //private ContextMenuStrip _checkoutMenu = null!;
+        //private ContextMenuStrip _saleMenu = null!;
+        //private ContextMenuStrip _reportMenu = null!;
+
 
 
         public MainForm()
         {
             InitializeComponent();
+            // ✅ 超商風格（設計/執行都能跑，不碰 DB）
+            ApplyConvenienceStoreTheme();
 
+            // ✅ 設計工具打開畫面時，不跑 DB 初始化（避免 Designer 報錯）
+            if (IsDesignTime()) return;
+
+            // ✅ 只有正式執行才跑 DB / Service 初始化
+            InitRuntime();
+        }
+
+        /*
+         * 原本在這裡面  public MainForm()
             btnClear.Click += btnClear_Click;
             btnCash.Click += btnCash_Click;
             btnCard.Click += btnCard_Click;
@@ -50,7 +85,7 @@ namespace POSv01
 
             _dbContext = new PosDbContext();
 
-            // 1) migrations 套用（如果你沒有 migrations，會進 catch 改用 EnsureCreated）
+            //// 1) migrations 套用（如果你沒有 migrations，會進 catch 改用 EnsureCreated）
             try
             {
                 _dbContext.Database.Migrate();
@@ -72,67 +107,215 @@ namespace POSv01
 
             _dbContext.Database.EnsureCreated();
 
-           
+
             _saleQueryService = new SaleQueryService(_dbContext);
             _returnService = new ReturnService(_dbContext, _inventoryService);
             _returnQueryService = new ReturnQueryService(_dbContext);
 
 
-            btnClear.Click += btnClear_Click;
-            btnCash.Click += btnCash_Click;
-            btnCard.Click += btnCard_Click;
-            btnMobile.Click += btnMobile_Click;
-            btnRemoveSelected.Click += btnRemoveSelected_Click;
-
-            gridCart.CellEndEdit += GridCart_CellEndEdit;
-            gridCart.KeyDown += gridCart_KeyDown;
 
             InitializeCartGrid();
             AddFeatureButtons();
             UpdateTotal();
             txtBarcode.Focus();
         }
+        */
+
+
+        // =========================================================
+        // ✅ DesignTime 判斷（constructor 內 DesignMode 不可靠）
+        // =========================================================
+        private static bool IsDesignTime()
+        {
+            return LicenseManager.UsageMode == LicenseUsageMode.Designtime;
+        }
+
+        // =========================================================
+        // ✅ 強制事件只綁一次（修 btnRemoveSelected_Click 觸發兩次）
+        // =========================================================
+        private static void HookClickOnce(Button btn, EventHandler handler)
+        {
+            // 不管被綁幾次，都先清掉
+            for (int i = 0; i < 8; i++)
+                btn.Click -= handler;
+
+            btn.Click += handler;
+        }
+
+        private void InitRuntime()
+        {
+            // ✅ 事件統一在這裡綁（Designer 綁到也沒關係，我們會先清掉再綁一次）
+            HookClickOnce(btnClear, btnClear_Click);
+            HookClickOnce(btnCash, btnCash_Click);
+            HookClickOnce(btnCard, btnCard_Click);
+            HookClickOnce(btnMobile, btnMobile_Click);
+            HookClickOnce(btnRemoveSelected, btnRemoveSelected_Click);
+
+            gridCart.CellEndEdit -= GridCart_CellEndEdit;
+            gridCart.CellEndEdit += GridCart_CellEndEdit;
+
+            gridCart.KeyDown -= gridCart_KeyDown;
+            gridCart.KeyDown += gridCart_KeyDown;
+
+            // ✅ DB 初始化
+            _dbContext = new PosDbContext();
+
+            try
+            {
+                _dbContext.Database.Migrate();
+            }
+            catch
+            {
+                _dbContext.Database.EnsureCreated();
+            }
+
+            // 最終保險：缺欄位就補上（你有這支就保留）
+            SchemaRepair.EnsureProductsHasImagePath(_dbContext);
+
+            _saleService = new SaleService(_dbContext);
+            _productService = new ProductService(_dbContext);
+
+            _inventoryService = new InventoryService(_dbContext);
+            _checkoutService = new CheckoutService(_dbContext, _inventoryService);
+
+            _saleQueryService = new SaleQueryService(_dbContext);
+            _returnService = new ReturnService(_dbContext, _inventoryService);
+            _returnQueryService = new ReturnQueryService(_dbContext);
+
+            InitializeCartGrid();
+            AddFeatureButtons();
+
+            UpdateTotal();
+            txtBarcode.Focus();
+        }
+
+
+
+
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            _dbContext.Dispose();
+            if (!IsDesignTime())
+                _dbContext?.Dispose();
+
             base.OnFormClosed(e);
         }
-        // ====== POS 流程功能按鈕（動態加入） ======
+
+        // =========================================================
+        // ✅ 超商版：右側快捷按鈕區（商品 / 查訂單 / 退貨(下拉) / 流程）
+        // =========================================================
         private void AddFeatureButtons()
         {
-            // 右側空位加四顆按鈕
-            var x = 700;
-            var y = 40;
-            var w = 90;
-            var h = 28;
-            var gap = 8;
+            flpQuick.Controls.Clear();
 
-            _btnPickProducts = new Button { Left = x, Top = y, Width = w, Height = h, Text = "商品" };
-            _btnOrderLookup = new Button { Left = x, Top = y + (h + gap) * 1, Width = w, Height = h, Text = "查訂單" };
-            _btnReturn = new Button { Left = x, Top = y + (h + gap) * 2, Width = w, Height = h, Text = "退貨" };
-            _btnHelp = new Button { Left = x, Top = y + (h + gap) * 3, Width = w, Height = h, Text = "流程" };
+            int w = 220;
+            int h = 52;
 
+            Button MakeQuick(string text)
+            {
+                var b = new Button
+                {
+                    Text = text,
+                    Width = w,
+                    Height = h,
+                    Font = new Font("Microsoft JhengHei UI", 12.5f, FontStyle.Bold),
+                    FlatStyle = FlatStyle.Flat,
+                    Margin = new Padding(0, 0, 0, 12),
+                    BackColor = Color.White
+                };
+                b.FlatAppearance.BorderSize = 1;
+                return b;
+            }
+
+            _btnPickProducts = MakeQuick("商品");
+            _btnOrderLookup = MakeQuick("查訂單");
+            _btnHelp = MakeQuick("流程");
+
+            // ✅ 退貨：主按鈕 + 下拉
+            int dropW = 40;
+            var pnlReturn = new Panel { Width = w, Height = h, Margin = new Padding(0, 0, 0, 12) };
+
+            _btnReturn = new Button
+            {
+                Left = 0,
+                Top = 0,
+                Width = w - dropW,
+                Height = h,
+                Text = "退貨",
+                Font = new Font("Microsoft JhengHei UI", 12.5f, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.White
+            };
+            _btnReturn.FlatAppearance.BorderSize = 1;
+
+            _btnReturnDrop = new Button
+            {
+                Left = w - dropW,
+                Top = 0,
+                Width = dropW,
+                Height = h,
+                Text = "▾",
+                Font = new Font("Microsoft JhengHei UI", 12.5f, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.White
+            };
+            _btnReturnDrop.FlatAppearance.BorderSize = 1;
+
+            pnlReturn.Controls.Add(_btnReturn);
+            pnlReturn.Controls.Add(_btnReturnDrop);
+
+            // 商品：連續點選加入（不關閉）
             _btnPickProducts.Click += (_, _) =>
             {
                 using var form = new ProductsForm(_productService, p => AddProductToCart(p));
-                form.CloseOnPick = true;
+                form.CloseOnPick = false;
+
+                // ✅ 視窗位置最佳化：靠右、靠近主視窗、不超出螢幕
+                form.StartPosition = FormStartPosition.Manual;
+                var wa = Screen.FromControl(this).WorkingArea;
+
+                int x = Math.Min(wa.Right - form.Width - 10, this.Right - form.Width - 10);
+                int y = Math.Max(wa.Top + 20, this.Top + 60);
+
+                form.Location = new Point(Math.Max(wa.Left + 10, x), y);
+
                 form.ShowDialog(this);
                 txtBarcode.Focus();
             };
 
+            // 查訂單：預設今天 + 可查退貨
             _btnOrderLookup.Click += (_, _) =>
             {
-                using var form = new OrderLookupForm(_saleQueryService);
+                using var form = new OrderLookupForm(_saleQueryService, _returnQueryService);
                 form.ShowDialog(this);
                 txtBarcode.Focus();
             };
 
-            _btnReturn.Click += (_, _) =>
+            // 退貨預設：今日退單（打開退貨 tab）
+            void OpenTodayReturns()
+            {
+                using var form = new OrderLookupForm(_saleQueryService, _returnQueryService, defaultToReturns: true);
+                form.ShowDialog(this);
+                txtBarcode.Focus();
+            }
+
+            // 新增退貨
+            void OpenCreateReturn()
             {
                 using var form = new ReturnForm(_returnService, _returnQueryService);
                 form.ShowDialog(this);
                 txtBarcode.Focus();
+            }
+
+            _btnReturn.Click += (_, _) => OpenTodayReturns();
+
+            _returnMenu = new ContextMenuStrip();
+            _returnMenu.Items.Add("今日退單", null, (_, _) => OpenTodayReturns());
+            _returnMenu.Items.Add("新增退貨（輸入原單號）", null, (_, _) => OpenCreateReturn());
+
+            _btnReturnDrop.Click += (_, _) =>
+            {
+                _returnMenu.Show(_btnReturnDrop, 0, _btnReturnDrop.Height);
             };
 
             _btnHelp.Click += (_, _) =>
@@ -142,19 +325,20 @@ namespace POSv01
                 txtBarcode.Focus();
             };
 
-            Controls.Add(_btnPickProducts);
-            Controls.Add(_btnOrderLookup);
-            Controls.Add(_btnReturn);
-            Controls.Add(_btnHelp);
+            flpQuick.Controls.Add(_btnPickProducts);
+            flpQuick.Controls.Add(_btnOrderLookup);
+            flpQuick.Controls.Add(pnlReturn);
+            flpQuick.Controls.Add(_btnHelp);
         }
 
 
 
-
-        // ====== 付款按鈕（Designer 綁事件到這三個） ======
+        // ====== 付款按鈕（結帳）======
         private void btnCash_Click(object? sender, EventArgs e) => Checkout(PaymentMethod.Cash);
         private void btnCard_Click(object? sender, EventArgs e) => Checkout(PaymentMethod.Card);
         private void btnMobile_Click(object? sender, EventArgs e) => Checkout(PaymentMethod.Mobile);
+
+
 
         private void Checkout(PaymentMethod method)
         {
@@ -227,9 +411,12 @@ namespace POSv01
             txtBarcode.Focus();
         }
 
+
+
+        // ✅ 只刪「目前那筆」（不管你選幾筆，都只刪 CurrentRow）
         private void btnRemoveSelected_Click(object? sender, EventArgs e)
         {
-            RemoveSelectedItem();
+            RemoveCurrentItemOnly();
             txtBarcode.Focus();
         }
 
@@ -237,17 +424,30 @@ namespace POSv01
         {
             if (e.KeyCode == Keys.Delete)
             {
-                RemoveSelectedItem();
+                RemoveCurrentItemOnly();
                 e.Handled = true;
             }
         }
 
-        private void RemoveSelectedItem()
+        private void RemoveCurrentItemOnly()
         {
             if (gridCart.CurrentRow?.DataBoundItem is not CartItemViewModel item) return;
+
+            int idx = gridCart.CurrentRow.Index;
+
             _cartItems.Remove(item);
             gridCart.Refresh();
             UpdateTotal();
+
+            // ✅ 刪完自動選下一筆（方便連續刪）
+            if (gridCart.Rows.Count > 0)
+            {
+                int next = Math.Min(idx, gridCart.Rows.Count - 1);
+                gridCart.CurrentCell = gridCart.Rows[next].Cells[0];
+
+                gridCart.ClearSelection();
+                gridCart.Rows[next].Selected = true;
+            }
         }
 
         private void AddProductToCart(Product product)
@@ -336,47 +536,130 @@ namespace POSv01
 
 
 
-
-
-
-
-
-
-
-        private void btnPickProducts_Click(object sender, EventArgs e)
+        private void RemoveSelectedItems()
         {
-            using var form = new ProductsForm(
-                _productService,
-                product => AddProductToCart(product) // 點照片卡片就加到購物車
-            );
+            var targets = gridCart.SelectedRows
+                .Cast<DataGridViewRow>()
+                .Select(r => r.DataBoundItem as CartItemViewModel)
+                .Where(x => x != null)
+                .ToList();
 
-            form.ShowDialog(this);
-            txtBarcode.Focus();
+            // 沒有 SelectedRows 就用 CurrentRow
+            if (targets.Count == 0 && gridCart.CurrentRow?.DataBoundItem is CartItemViewModel one)
+                targets.Add(one);
+
+            if (targets.Count == 0) return;
+
+            foreach (var it in targets)
+                _cartItems.Remove(it!);
+
+            gridCart.Refresh();
+            UpdateTotal();
+
+            // ✅ 保持選取（選下一筆）
+            if (gridCart.Rows.Count > 0)
+                gridCart.CurrentCell = gridCart.Rows[Math.Min(0, gridCart.Rows.Count - 1)].Cells[0];
+        }
+
+        private void RemoveSelectedItem()
+        {
+            if (gridCart.CurrentRow?.DataBoundItem is not CartItemViewModel item) return;
+            _cartItems.Remove(item);
+            gridCart.Refresh();
+            UpdateTotal();
+        }
+         // =========================================================
+        // ✅ 超商主題（不要寫在 Designer.cs，Designer 會報錯）
+        // =========================================================
+        private void ApplyConvenienceStoreTheme()
+        {
+            Text = "POSv01 超商收銀台";
+            Font = new Font("Microsoft JhengHei UI", 10f);
+            BackColor = Color.WhiteSmoke;
+
+            // 條碼輸入更像 POS
+            txtBarcode.Font = new Font("Microsoft JhengHei UI", 14f, FontStyle.Bold);
+
+            // Grid
+            gridCart.BackgroundColor = Color.White;
+            gridCart.BorderStyle = BorderStyle.FixedSingle;
+            gridCart.RowHeadersVisible = false;
+            gridCart.EnableHeadersVisualStyles = false;
+            gridCart.ColumnHeadersDefaultCellStyle.BackColor = Color.Gainsboro;
+            gridCart.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft JhengHei UI", 10f, FontStyle.Bold);
+            gridCart.DefaultCellStyle.Font = new Font("Microsoft JhengHei UI", 10f, FontStyle.Regular);
+            gridCart.DefaultCellStyle.SelectionBackColor = Color.LightGoldenrodYellow;
+            gridCart.DefaultCellStyle.SelectionForeColor = Color.Black;
+
+            // 總金額加大
+            lblTotal.Font = new Font("Microsoft JhengHei UI", 22f, FontStyle.Bold);
+            lblTotal.ForeColor = Color.DarkRed;
+
+            lblTotalTitle.Font = new Font("Microsoft JhengHei UI", 12f, FontStyle.Bold);
+
+            // 付款按鈕大顆
+            StylePayButton(btnCash, "現金結帳");
+            StylePayButton(btnCard, "信用卡");
+            StylePayButton(btnMobile, "行動支付");
+
+            // 清空 / 移除
+            StyleSmallButton(btnClear, "清空");
+            StyleSmallButton(btnRemoveSelected, "移除一筆");
+        }
+
+        private void StylePayButton(Button b, string text)
+        {
+            b.Text = text;
+            b.Width = 240;
+            b.Height = 62;
+            b.Font = new Font("Microsoft JhengHei UI", 14f, FontStyle.Bold);
+            b.FlatStyle = FlatStyle.Flat;
+            b.BackColor = Color.White;
+            b.FlatAppearance.BorderSize = 1;
+        }
+
+        private void StyleSmallButton(Button b, string text)
+        {
+            b.Text = text;
+            b.Height = 34;
+            b.Font = new Font("Microsoft JhengHei UI", 10.5f, FontStyle.Bold);
+            b.FlatStyle = FlatStyle.Flat;
+            b.BackColor = Color.White;
+            b.FlatAppearance.BorderSize = 1;
         }
 
 
+        /*
+        private void ApplyConvenienceStoreTheme()
+        {
+            // 付款大按鈕統一風格
+            void StylePay(Button b)
+            {
+                b.Width = 220;
+                b.Height = 54;
+                b.Font = new Font("Microsoft JhengHei UI", 14F, FontStyle.Bold);
+                b.FlatStyle = FlatStyle.Flat;
+            }
 
-        //private void AddProductToCart(string barcode)
-        //{
-        //    var product = _saleService.FindProductByBarcode(barcode);
-        //    if (product == null)
-        //    {
-        //        MessageBox.Show($"找不到商品，條碼：{barcode}", "查無商品",
-        //            MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        //        return;
-        //    }
+            StylePay(btnCash);
+            StylePay(btnCard);
+            StylePay(btnMobile);
 
-        //    AddProductToCart(product);
-        //}
-
-
-
-      
+            // 購物車 Grid 風格
+            gridCart.BackgroundColor = Color.White;
+            gridCart.BorderStyle = BorderStyle.FixedSingle;
+            gridCart.RowHeadersVisible = false;
+            gridCart.EnableHeadersVisualStyles = false;
+            gridCart.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft JhengHei UI", 10F, FontStyle.Bold);
+            gridCart.DefaultCellStyle.Font = new Font("Microsoft JhengHei UI", 10F, FontStyle.Regular);
+        }
+        */
 
 
-      
-        
-        
+
+
+
+
 
         private void btnHistory_Click(object sender, EventArgs e)
         {
@@ -385,12 +668,71 @@ namespace POSv01
             txtBarcode.Focus();
         }
 
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
 
 
 
 
-      
+
         // btnCash / btnCard / btnMobile 之後會接 Checkout 邏輯。
+
+        /*
+        private void ApplyStoreTheme()
+        {
+            // 全局字體
+            Font = new System.Drawing.Font("Microsoft JhengHei UI", 10f);
+            Text = "POSv01 收銀台";
+            BackColor = Color.WhiteSmoke;
+
+            // Grid 外觀
+            gridCart.BackgroundColor = Color.White;
+            gridCart.BorderStyle = BorderStyle.None;
+            gridCart.RowHeadersVisible = false;
+            gridCart.EnableHeadersVisualStyles = false;
+            gridCart.ColumnHeadersDefaultCellStyle.BackColor = Color.Gainsboro;
+            gridCart.ColumnHeadersDefaultCellStyle.Font = new Font(Font, FontStyle.Bold);
+            gridCart.DefaultCellStyle.SelectionBackColor = Color.LightGoldenrodYellow;
+            gridCart.DefaultCellStyle.SelectionForeColor = Color.Black;
+
+            // 總金額顯示加大
+            lblTotal.Font = new Font(Font.FontFamily, 18f, FontStyle.Bold);
+            lblTotal.ForeColor = Color.DarkRed;
+
+            label1.Font = new Font(Font.FontFamily, 12f, FontStyle.Bold);
+
+            // 付款按鈕變大（超商風）
+            foreach (var b in new[] { btnCash, btnCard, btnMobile })
+            {
+                b.Height = 48;
+                b.Width = 160;
+                b.FlatStyle = FlatStyle.Flat;
+                b.Font = new Font(Font.FontFamily, 12f, FontStyle.Bold);
+            }
+
+            btnCash.Text = "現金結帳";
+            btnCard.Text = "信用卡";
+            btnMobile.Text = "行動支付";
+
+            // 清空 / 移除按鈕
+            btnClear.FlatStyle = FlatStyle.Flat;
+            btnRemoveSelected.FlatStyle = FlatStyle.Flat;
+        }
+        */
+
+
+
+
+
+
+
+
+
+
+
+
 
     }
 }
