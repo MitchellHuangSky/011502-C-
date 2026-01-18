@@ -50,7 +50,7 @@ namespace POSv01.UI
             var key = _txtSaleNo.Text.Trim();
             if (string.IsNullOrWhiteSpace(key)) return;
 
-            // 用 SearchSales 找出該單號的 Id（最簡單）
+            // 用 SearchSales 找出該單號的 Id
             var row = _q.SearchSales(null, null, key, limit: 50).FirstOrDefault(s => s.SaleNo == key);
             if (row == null)
             {

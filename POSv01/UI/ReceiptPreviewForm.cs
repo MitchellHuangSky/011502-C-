@@ -384,23 +384,5 @@ namespace POSv01
             return sb.ToString();
         }
 
-        /*
-        public sealed class ReturnReceiptDto
-        {
-            public int ReturnId { get; set; }
-            public string ReturnNo { get; set; } = "";
-            public DateTime CreatedAtLocal { get; set; }
-
-            // ✅ 給 ReceiptPreviewForm 用
-            public string OriginalSaleNo { get; set; } = "";
-            public string? MemberCode { get; set; }
-            public string? ClerkName { get; set; }
-
-            public decimal TotalRefund { get; set; }
-            public List<ReturnItemRow> Items { get; set; } = new();
-        }
-        */
-
-
     }
 }

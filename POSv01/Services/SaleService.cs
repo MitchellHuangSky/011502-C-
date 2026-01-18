@@ -35,5 +35,4 @@ namespace POSv01.Services
                 .FirstOrDefault(p => p.Barcode == barcode && p.IsActive);
         }
     }
-
-    }
+}

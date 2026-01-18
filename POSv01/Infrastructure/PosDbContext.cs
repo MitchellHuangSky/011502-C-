@@ -26,7 +26,7 @@ namespace POSv01.Infrastructure
         public DbSet<Inventory> Inventories => Set<Inventory>();
         public DbSet<InventoryTxn> InventoryTxns => Set<InventoryTxn>();
        
-        //public DbSet<ReturnItem> ReturnItems => Set<ReturnItem>();
+     
 
 
        
@@ -174,9 +174,7 @@ namespace POSv01.Infrastructure
                     IsActive = true,
                     CreatedAt = seedTime
                 }
-            );
-
-    
+            );    
         }
             */
     }

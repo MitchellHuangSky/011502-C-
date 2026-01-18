@@ -93,5 +93,4 @@ namespace POSv01.UI
             public override string ToString() => Text;
         }
     }
-
-    }
+}

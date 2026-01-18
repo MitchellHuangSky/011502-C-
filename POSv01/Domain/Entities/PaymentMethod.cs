@@ -4,11 +4,7 @@ using System.Text;
 
 namespace POSv01.Domain.Entities
 {
-    /*
-    internal class PaymentMethod
-    {
-    }
-    */
+    
     public enum PaymentMethod
     {
         Cash = 1,

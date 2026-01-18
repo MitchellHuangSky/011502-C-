@@ -200,9 +200,6 @@ namespace POSv01.UI
             }
         }
 
-
-
-
         private void ReloadProducts()
         {
             EnsureInjected();

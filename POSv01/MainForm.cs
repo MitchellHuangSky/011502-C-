@@ -13,7 +13,7 @@ namespace POSv01
 {
     public partial class MainForm : Form
     {
-        // ✅ 設計模式時會 return，這些欄位會沒初始化，所以用 null! 安全消除 CS8618
+        // 設計模式時會 return，這些欄位會沒初始化，所以用 null! 安全消除 CS8618
         private PosDbContext _dbContext = null!;
         private SaleService _saleService = null!;
         private ProductService _productService = null!;
@@ -72,55 +72,6 @@ namespace POSv01
             InitRuntime();
         }
 
-        /*
-         * 原本在這裡面  public MainForm()
-            btnClear.Click += btnClear_Click;
-            btnCash.Click += btnCash_Click;
-            btnCard.Click += btnCard_Click;
-            btnMobile.Click += btnMobile_Click;
-            btnRemoveSelected.Click += btnRemoveSelected_Click;
-
-            gridCart.CellEndEdit += GridCart_CellEndEdit;
-            gridCart.KeyDown += gridCart_KeyDown;
-
-            _dbContext = new PosDbContext();
-
-            //// 1) migrations 套用（如果你沒有 migrations，會進 catch 改用 EnsureCreated）
-            try
-            {
-                _dbContext.Database.Migrate();
-            }
-            catch
-            {
-                _dbContext.Database.EnsureCreated();
-            }
-
-            // 2) 最終保險：缺欄位就補上（避免 migrations 狀態亂掉時還能跑）
-            //    若你沒有 SchemaRepair 這支類別，就先把這行註解掉。
-            SchemaRepair.EnsureProductsHasImagePath(_dbContext);
-
-            _saleService = new SaleService(_dbContext);
-            _productService = new ProductService(_dbContext);
-
-            _inventoryService = new InventoryService(_dbContext);
-            _checkoutService = new CheckoutService(_dbContext, _inventoryService);
-
-            _dbContext.Database.EnsureCreated();
-
-
-            _saleQueryService = new SaleQueryService(_dbContext);
-            _returnService = new ReturnService(_dbContext, _inventoryService);
-            _returnQueryService = new ReturnQueryService(_dbContext);
-
-
-
-            InitializeCartGrid();
-            AddFeatureButtons();
-            UpdateTotal();
-            txtBarcode.Focus();
-        }
-        */
-
 
         // =========================================================
         // ✅ DesignTime 判斷（constructor 內 DesignMode 不可靠）
@@ -144,7 +95,7 @@ namespace POSv01
 
         private void InitRuntime()
         {
-            // ✅ 事件統一在這裡綁（Designer 綁到也沒關係，我們會先清掉再綁一次）
+            //  事件統一在這裡綁（Designer 綁到也沒關係，我們會先清掉再綁一次）
             HookClickOnce(btnClear, btnClear_Click);
             HookClickOnce(btnCash, btnCash_Click);
             HookClickOnce(btnCard, btnCard_Click);
@@ -629,36 +580,6 @@ namespace POSv01
         }
 
 
-        /*
-        private void ApplyConvenienceStoreTheme()
-        {
-            // 付款大按鈕統一風格
-            void StylePay(Button b)
-            {
-                b.Width = 220;
-                b.Height = 54;
-                b.Font = new Font("Microsoft JhengHei UI", 14F, FontStyle.Bold);
-                b.FlatStyle = FlatStyle.Flat;
-            }
-
-            StylePay(btnCash);
-            StylePay(btnCard);
-            StylePay(btnMobile);
-
-            // 購物車 Grid 風格
-            gridCart.BackgroundColor = Color.White;
-            gridCart.BorderStyle = BorderStyle.FixedSingle;
-            gridCart.RowHeadersVisible = false;
-            gridCart.EnableHeadersVisualStyles = false;
-            gridCart.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft JhengHei UI", 10F, FontStyle.Bold);
-            gridCart.DefaultCellStyle.Font = new Font("Microsoft JhengHei UI", 10F, FontStyle.Regular);
-        }
-        */
-
-
-
-
-
 
 
         private void btnHistory_Click(object sender, EventArgs e)
@@ -672,67 +593,6 @@ namespace POSv01
         {
 
         }
-
-
-
-
-
-        // btnCash / btnCard / btnMobile 之後會接 Checkout 邏輯。
-
-        /*
-        private void ApplyStoreTheme()
-        {
-            // 全局字體
-            Font = new System.Drawing.Font("Microsoft JhengHei UI", 10f);
-            Text = "POSv01 收銀台";
-            BackColor = Color.WhiteSmoke;
-
-            // Grid 外觀
-            gridCart.BackgroundColor = Color.White;
-            gridCart.BorderStyle = BorderStyle.None;
-            gridCart.RowHeadersVisible = false;
-            gridCart.EnableHeadersVisualStyles = false;
-            gridCart.ColumnHeadersDefaultCellStyle.BackColor = Color.Gainsboro;
-            gridCart.ColumnHeadersDefaultCellStyle.Font = new Font(Font, FontStyle.Bold);
-            gridCart.DefaultCellStyle.SelectionBackColor = Color.LightGoldenrodYellow;
-            gridCart.DefaultCellStyle.SelectionForeColor = Color.Black;
-
-            // 總金額顯示加大
-            lblTotal.Font = new Font(Font.FontFamily, 18f, FontStyle.Bold);
-            lblTotal.ForeColor = Color.DarkRed;
-
-            label1.Font = new Font(Font.FontFamily, 12f, FontStyle.Bold);
-
-            // 付款按鈕變大（超商風）
-            foreach (var b in new[] { btnCash, btnCard, btnMobile })
-            {
-                b.Height = 48;
-                b.Width = 160;
-                b.FlatStyle = FlatStyle.Flat;
-                b.Font = new Font(Font.FontFamily, 12f, FontStyle.Bold);
-            }
-
-            btnCash.Text = "現金結帳";
-            btnCard.Text = "信用卡";
-            btnMobile.Text = "行動支付";
-
-            // 清空 / 移除按鈕
-            btnClear.FlatStyle = FlatStyle.Flat;
-            btnRemoveSelected.FlatStyle = FlatStyle.Flat;
-        }
-        */
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 }
