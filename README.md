@@ -5,10 +5,8 @@
 
 ---
 
-## 📸 系統畫面 / Demo（請自行放圖片）
+## 📸 系統畫面 / Demo
 
-> 建議把圖片放在 `docs/images/` 下面，再更新路徑即可  
-> 你之後要補截圖，只要把下面連結換成你的檔名即可 ✅
 
 ### 主收銀台畫面
 <img width="1171" height="607" alt="圖片2" src="https://github.com/user-attachments/assets/29bf6274-ca79-48ce-aef3-6fd78e1c7429" />
@@ -26,13 +24,13 @@
 
 ---
 
-## ⭐ 專案亮點（面試官重點版）
+## ⭐ 專案亮點
 
 - ✅ **交易一致性（Transaction + Rollback）**  
   結帳 / 退貨流程使用交易機制保證 **Sale + SaleItems + 庫存更新** 要嘛全部成功，要嘛全部回滾，避免資料只寫一半造成帳務錯誤。
 
 - ✅ **Use Case Service 流程封裝（後端導向設計）**  
-  UI 僅負責觸發流程，商業邏輯集中在 Service 層，具備移植到 **ASP.NET Core Web API** 的良好基礎。
+  UI 是最容易變動的部分，但 Service 層是核心。我把交易流程封裝在 Service，並用 Transaction 確保一致性，所以未來換成 Web / Mobile / API 都可以沿用核心邏輯。
 
 - ✅ **支援部分退貨 + 商業規則驗證**  
   退貨流程支援「部分退貨」，並驗證「退貨數量不得超過原購買數量」，確保交易正確性。
@@ -263,23 +261,6 @@ SchemaRepair.EnsureProductsHasImagePath(_dbContext);
 - `POST /api/returns` → `ReturnService.CreateReturn()`
 - `GET /api/sales` → `SaleQueryService.SearchSales(...)`
 - `GET /api/returns` → `ReturnQueryService.SearchReturns(...)`
-
----
-
-## 🎤 面試 60 秒專案自我介紹稿（可直接照念）
-
-我這次準備的專案是 **POSv01 收銀系統**，使用 **C# WinForms**做操作介面，後端資料層是 **SQLite + EF Core**。  
-我在這個專案的核心目標不是只做 UI，而是把它設計成一個接近真實商用系統的交易流程，所以我特別強調 **後端的資料一致性與可維護架構**。
-
-在結帳與退貨流程上，我把邏輯封裝在 **Service Layer（Use Case Service）**，並且用 **Transaction + Rollback** 保證像是 `Sale、SaleItems、庫存更新` 這些資料變更要嘛全部成功，要嘛全部回滾，避免資料寫一半造成帳務錯誤。  
-
-退貨部分我也支援 **部分退貨**，並加入商業規則驗證，例如「退貨數量不能超過原購買數量」，確保交易邏輯正確。  
-
-在查詢與報表方面，我另外做了 Query Service，使用 `AsNoTracking`、日期/單號/關鍵字篩選、DTO 投影以及分頁/限制筆數，讓查詢在資料量變大時仍然有效能。資料庫端也做了 `SaleNo Unique` 和 `CreatedAt Index` 強化完整性與查詢速度。  
-
-整體架構上，我把 UI、商業流程、Domain Model、Database Access 分離，所以如果要轉成 **ASP.NET Core Web API**，基本上只需要加 Controller 就可以沿用同一套 Service，這也是我想呈現的後端設計能力。
-
----
 
 ## 🎯 技能對應（Skills Mapping）
 
