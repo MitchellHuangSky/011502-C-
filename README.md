@@ -9,7 +9,8 @@
 
 
 ### 主收銀台畫面
-<img width="1171" height="607" alt="圖片2" src="https://github.com/user-attachments/assets/29bf6274-ca79-48ce-aef3-6fd78e1c7429" />
+
+<img width="1171" height="607" alt="圖片2" src="https://github.com/user-attachments/assets/6d8c3d1e-aef1-4940-bdeb-186317260980" />
 
 
 ### 商品選擇（快速加入購物車）
